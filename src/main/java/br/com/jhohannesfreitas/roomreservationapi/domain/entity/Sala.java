@@ -1,6 +1,7 @@
 package br.com.jhohannesfreitas.roomreservationapi.domain.entity;
 
 import br.com.jhohannesfreitas.roomreservationapi.domain.enums.StatusSala;
+import br.com.jhohannesfreitas.roomreservationapi.dto.SalaRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 
@@ -60,5 +61,10 @@ public class Sala {
 
     public void setReservas(List<Reserva> reservas) {
         this.reservas = reservas;
+    }
+
+    public void atualizar(SalaRequest request) {
+        this.numero = request.numero();
+        this.capacidade = request.capacidade();
     }
 }

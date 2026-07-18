@@ -9,8 +9,10 @@ import br.com.jhohannesfreitas.roomreservationapi.repository.SalaRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SalaService {
@@ -21,7 +23,7 @@ public class SalaService {
         this.salaRepository = salaRepository;
     }
 
-
+    @Transactional
     public SalaResponse cadastrar(@Valid SalaRequest salaRequest) {
         // Verificar se a sala já existe
         verificaSalaExistentePorNumero(salaRequest);
@@ -60,10 +62,54 @@ public class SalaService {
 
     }
 
+    @Transactional
+    public SalaResponse atualizar(Long id, SalaRequest salaRequest) {
+        // Buscar Sala por ID no banco
+        Sala sala = buscaPorId(id);
+
+        //Verificar se existe uma OUTRA sala com este número por ID
+        verificaSeExisteOutraSalaComMesmoNumero(id, salaRequest.numero());
+
+        // Settar os dados do Request na minha Entity
+        sala.atualizar(salaRequest);
+
+        // Salvo a minha Entity atualizada com os dados passados do UsuarioRequest(DTO) como parâmetro
+        Sala salaAtualizada = salaRepository.save(sala);
+
+        // Retorna a resposta transformando a minha Entity Sala em DTO SalaResponse
+        return SalaMapper.toResponse(salaAtualizada);
+    }
+
+    @Transactional
+    public void deletar(Long id) {
+        // Busca se a sala existe no banco
+        buscaPorId(id);
+
+        // Se existe, deleta pelo ID.
+        salaRepository.deleteById(id);
+    }
+
+    private Sala buscaPorId(Long id) {
+        return salaRepository.findById(id)
+                .orElseThrow(() -> new RegraNegocioException("Sala com id " + id + " não encontrado.",
+                        HttpStatus.NOT_FOUND));
+    }
+
     private void verificaSalaExistentePorNumero(SalaRequest salaRequest) {
         if (salaRepository.existsByNumero(salaRequest.numero())) {
             throw new RegraNegocioException("Sala já cadastrado com este número",
                     HttpStatus.CONFLICT);
+        }
+    }
+
+    private void verificaSeExisteOutraSalaComMesmoNumero(Long id, Integer numero) {
+        Optional<Sala> outraSala = salaRepository.findByNumero(numero);
+        if (outraSala.isPresent()) {
+            Sala salaComMesmoNumero = outraSala.get();
+            if (!salaComMesmoNumero.getId().equals(id)) {
+                throw new RegraNegocioException("Sala já cadastrado com este número",
+                        HttpStatus.CONFLICT);
+            }
         }
     }
 }
