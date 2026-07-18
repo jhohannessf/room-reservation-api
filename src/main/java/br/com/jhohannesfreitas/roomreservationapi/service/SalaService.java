@@ -9,6 +9,7 @@ import br.com.jhohannesfreitas.roomreservationapi.repository.SalaRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public class SalaService {
         this.salaRepository = salaRepository;
     }
 
-
+    @Transactional
     public SalaResponse cadastrar(@Valid SalaRequest salaRequest) {
         // Verificar se a sala já existe
         verificaSalaExistentePorNumero(salaRequest);
@@ -61,6 +62,7 @@ public class SalaService {
 
     }
 
+    @Transactional
     public SalaResponse atualizar(Long id, SalaRequest salaRequest) {
         // Buscar Sala por ID no banco
         Sala sala = buscaPorId(id);
@@ -78,6 +80,7 @@ public class SalaService {
         return SalaMapper.toResponse(salaAtualizada);
     }
 
+    @Transactional
     public void deletar(Long id) {
         // Busca se a sala existe no banco
         buscaPorId(id);
