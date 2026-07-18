@@ -37,4 +37,15 @@ public class SalaController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(salaService.listarPorId(id));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<SalaResponse> atualizar(@PathVariable Long id, @RequestBody @Valid SalaRequest salaRequest) {
+        return ResponseEntity.ok(salaService.atualizar(id, salaRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        salaService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
 }

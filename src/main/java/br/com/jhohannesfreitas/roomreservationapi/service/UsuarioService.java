@@ -74,7 +74,7 @@ public class UsuarioService {
 
     }
 
-    public void deletarPorId(Long id) {
+    public void deletar(Long id) {
         // Busca se o ID do usuário existe no banco
         Usuario usuario = buscarPorId(id);
 
