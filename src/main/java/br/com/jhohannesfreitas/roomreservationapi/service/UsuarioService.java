@@ -8,6 +8,7 @@ import br.com.jhohannesfreitas.roomreservationapi.mapper.UsuarioMapper;
 import br.com.jhohannesfreitas.roomreservationapi.repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,7 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
     }
 
+    @Transactional
     public UsuarioResponse cadastrar(UsuarioRequest usuarioRequest) {
 
         // Verifica se o usuario já existe no banco com este e-mail
@@ -55,6 +57,7 @@ public class UsuarioService {
         return UsuarioMapper.toResponse(buscarPorId(id));
     }
 
+    @Transactional
     public UsuarioResponse atualizar(Long id, UsuarioRequest usuarioRequest) {
 
         // Busca o id no banco pra saber se o usuário existe
@@ -74,6 +77,7 @@ public class UsuarioService {
 
     }
 
+    @Transactional
     public void deletar(Long id) {
         // Busca se o ID do usuário existe no banco
         Usuario usuario = buscarPorId(id);
