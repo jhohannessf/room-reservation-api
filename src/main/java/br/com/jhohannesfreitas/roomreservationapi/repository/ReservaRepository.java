@@ -20,4 +20,6 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> buscarReservasComMesmaSalaEData(Long id, LocalDate data);
 
     List<Reserva> findBySalaIdAndDataAndStatus(Long salaId, LocalDate data, StatusReserva status);
+
+    List<Reserva> findBySalaIdAndDataAndStatusAndIdNot(Long salaId, LocalDate data, StatusReserva status, Long idReserva);
 }

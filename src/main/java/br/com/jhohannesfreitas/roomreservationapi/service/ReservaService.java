@@ -14,6 +14,7 @@ import br.com.jhohannesfreitas.roomreservationapi.repository.SalaRepository;
 import br.com.jhohannesfreitas.roomreservationapi.repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -33,6 +34,7 @@ public class ReservaService {
         this.usuarioRepository = usuarioRepository;
     }
 
+    @Transactional
     public ReservaResponse cadastrar(ReservaRequest reservaRequest) {
         //Validar se o ID do Usuario informado no DTO ReservaRequest existe
         Usuario usuario = buscarUsuarioPorId(reservaRequest.usuarioId());
@@ -74,6 +76,50 @@ public class ReservaService {
 
     public ReservaResponse listarPorId(Long id) {
        return ReservaMapper.toResponse(buscarReservaPorId(id));
+    }
+
+    @Transactional
+    public ReservaResponse atualizar(Long id, ReservaRequest reservaRequest) {
+        // Verifica se a Reserva existe
+        Reserva reserva = buscarReservaPorId(id);
+
+        // Verificar se o usuário existe
+        Usuario usuario = buscarUsuarioPorId(reservaRequest.usuarioId());
+
+        // Verifica se a sala existe
+        Sala sala = buscaSalaPorId(reservaRequest.salaId());
+
+        // Valida Status da Sala = Livre
+        validarStatusSala(sala);
+
+        // Valida a Data
+        validarDataNaoPodeSerNoPassado(reservaRequest.data());
+
+        // Valida intervalo horário
+        validarIntervaloHorario(reservaRequest.horaInicial(), reservaRequest.horaFinal());
+
+        // Validar capacidade
+        validarCapacidade(reservaRequest.quantidadePessoas(), sala.getCapacidade());
+
+        // Validar conflitos de horário, menos para o id da reserva
+        validarConflitoHorarioAtualizacao(reservaRequest.salaId(),reservaRequest.data(),reservaRequest.horaInicial(),reservaRequest.horaFinal(),StatusReserva.ATIVA,id);
+
+        // Atualizar a Entity Reserva com dados DTO
+        reserva.atualizar(reservaRequest, usuario,  sala);
+
+        // Salvar a nova Entity atualizada
+        Reserva reservaAtualizada = reservaRepository.save(reserva);
+
+        // Retornar como resposta ReservaResponse DTO
+        return ReservaMapper.toResponse(reservaAtualizada);
+
+    }
+
+    public void deletar(Long id) {
+        // Busca a reserva pelo Id
+        Reserva reserva = buscarReservaPorId(id);
+        // Deleta a reserva
+        reservaRepository.delete(reserva);
     }
 
     private Reserva buscarReservaPorId(Long id) {
@@ -152,6 +198,18 @@ public class ReservaService {
                         HttpStatus.CONFLICT);
             }
         }
+    }
+
+    private void validarConflitoHorarioAtualizacao(Long salaId, LocalDate data, LocalTime horaInicial, LocalTime horaFinal, StatusReserva status, Long idReserva) {
+        List<Reserva> listaReservas = reservaRepository.findBySalaIdAndDataAndStatusAndIdNot(salaId, data, status, idReserva);
+        for (Reserva reservaExistente : listaReservas) {
+            if (reservaExistente.getHoraInicial().isBefore(horaFinal)
+                    && reservaExistente.getHoraFinal().isAfter(horaInicial)) {
+                throw new RegraNegocioException("Horário inválido, já existe reserva para o horário informado",
+                        HttpStatus.CONFLICT);
+            }
+        }
+
     }
 }
 

@@ -58,5 +58,17 @@ public class ReservaController {
                 .body(reservaService.listarPorId(id));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ReservaResponse> atualizar(@PathVariable Long id, @RequestBody @Valid ReservaRequest reservaRequest) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(reservaService.atualizar(id, reservaRequest));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletarPorId(@PathVariable Long id) {
+        reservaService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
