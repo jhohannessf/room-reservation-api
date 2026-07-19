@@ -115,6 +115,7 @@ public class ReservaService {
 
     }
 
+    @Transactional
     public void deletar(Long id) {
         // Busca a reserva pelo Id
         Reserva reserva = buscarReservaPorId(id);
