@@ -3,6 +3,7 @@ package br.com.jhohannesfreitas.roomreservationapi.controller;
 import br.com.jhohannesfreitas.roomreservationapi.dto.UsuarioRequest;
 import br.com.jhohannesfreitas.roomreservationapi.dto.UsuarioResponse;
 import br.com.jhohannesfreitas.roomreservationapi.service.UsuarioService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/usuarios")
+@Tag(name = "Usuários", description = "Operações relacionadas aos usuários")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;

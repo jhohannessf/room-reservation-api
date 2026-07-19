@@ -98,7 +98,7 @@ public class UsuarioService {
         }
     }
 
-    private Usuario buscarPorId(Long id) {
+    public Usuario buscarPorId(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RegraNegocioException("Usuário com id " + id + " não encontrado.",
                         HttpStatus.NOT_FOUND));
