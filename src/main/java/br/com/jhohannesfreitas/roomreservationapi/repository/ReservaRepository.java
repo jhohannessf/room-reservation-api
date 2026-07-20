@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
+    // Outra forma de fazer usando NativeQuery
     @Query(value =
             """
             SELECT *
