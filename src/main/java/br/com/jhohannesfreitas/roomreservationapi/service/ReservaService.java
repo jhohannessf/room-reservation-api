@@ -214,12 +214,4 @@ public class ReservaService {
     }
 }
 
-//    Regras de Negócio
-//    Não pode reservar sala inativa; ok
-//    Capacidade da sala deve ser positiva; ok
-//    Datas de início anteriores às de fim são inválidas; ok
-//    A mesma sala não pode ter reservas sobrepostas.-ok
-//    Reservas canceladas não entram em checagem de conflitos-ok
-//    Use intervalo semiaberto (incluindo o início mas sem incluir o fim) para comparação. -ok
-//    Documente exemplos-limite (fim igual ao início é permitido). -ok
-//    statusReserva será um Enum (LIVRE, ATIVA, CANCELADA) ok
+
