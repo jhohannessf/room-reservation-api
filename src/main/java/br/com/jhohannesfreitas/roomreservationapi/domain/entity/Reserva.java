@@ -1,6 +1,7 @@
 package br.com.jhohannesfreitas.roomreservationapi.domain.entity;
 
 import br.com.jhohannesfreitas.roomreservationapi.domain.enums.StatusReserva;
+import br.com.jhohannesfreitas.roomreservationapi.dto.ReservaRequest;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -88,5 +89,14 @@ public class Reserva {
     public void alterarHorario(LocalTime hora_inicial, LocalTime hora_final) {
         this.horaInicial = hora_inicial;
         this.horaFinal = hora_final;
+    }
+
+    public void atualizar(ReservaRequest reservaRequest, Usuario usuario, Sala sala) {
+        this.data = reservaRequest.data();
+        this.horaInicial = reservaRequest.horaInicial();
+        this.horaFinal = reservaRequest.horaFinal();
+        this.quantidadePessoas = reservaRequest.quantidadePessoas();
+        this.usuario = usuario;
+        this.sala = sala;
     }
 }

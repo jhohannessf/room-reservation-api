@@ -89,7 +89,7 @@ public class SalaService {
         salaRepository.deleteById(id);
     }
 
-    private Sala buscaPorId(Long id) {
+    public Sala buscaPorId(Long id) {
         return salaRepository.findById(id)
                 .orElseThrow(() -> new RegraNegocioException("Sala com id " + id + " não encontrado.",
                         HttpStatus.NOT_FOUND));

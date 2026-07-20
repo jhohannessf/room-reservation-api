@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReservaMapper {
 
-    public Reserva toEntity(ReservaRequest reservaRequest, Usuario usuario, Sala sala) {
+    public static Reserva toEntity(ReservaRequest reservaRequest, Usuario usuario, Sala sala) {
         Reserva reserva = new  Reserva(
                 reservaRequest.data(),
                 reservaRequest.horaInicial(),
@@ -25,7 +25,7 @@ public class ReservaMapper {
 
     }
 
-    public ReservaResponse toResponse(Reserva reserva){
+    public static ReservaResponse toResponse(Reserva reserva){
         return new ReservaResponse(
                 reserva.getUsuario().getId(),
                 reserva.getSala().getId(),
