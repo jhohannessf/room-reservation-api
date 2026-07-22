@@ -74,11 +74,11 @@ public class SalaService {
 
     @Transactional
     public void deletar(Long id) {
-        // Busca se a sala existe no banco
-        buscaPorId(id);
+        // Captura a Busca se a sala existe no banco
+        Sala sala = buscaPorId(id);
 
-        // Se existe, deleta pelo ID.
-        salaRepository.deleteById(id);
+        // Se existe, deleta
+        salaRepository.delete(sala);
     }
 
     public Sala buscaPorId(Long id) {
