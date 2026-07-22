@@ -48,17 +48,9 @@ public class SalaService {
     }
 
     public SalaResponse listarPorId(Long id) {
-        // Verificar se a sala existe
-        boolean verificarSala = salaRepository.existsById(id);
-        if (!verificarSala) {
-            throw new RegraNegocioException("Não existe sala com o id: " + id,
-                    HttpStatus.NOT_FOUND);
-        }
-        // Pega a referência da sala no banco
-        Sala sala = salaRepository.getReferenceById(id);
-
-        // Retorna transformando a Entity Sala em um DTO SalaResponse
-        return SalaMapper.toResponse(sala);
+        // Verificar se a sala existe com o método buscaPorId()
+        // Retorna transformando a Entity Sala em um DTO SalaResponse usando o método toResponse do SalaMapper
+        return SalaMapper.toResponse(buscaPorId(id));
 
     }
 
