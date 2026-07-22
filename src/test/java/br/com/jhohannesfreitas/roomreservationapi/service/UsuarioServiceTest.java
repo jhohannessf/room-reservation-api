@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
@@ -291,6 +292,12 @@ class UsuarioServiceTest {
 
         // "Então Repository, você DEVERIA verificar se foi chamado o 'findById()' 1x passando o id do Usuário.
         then(usuarioRepository).should().findById(id);
+
+        // "Então Repository, você DEVERIA verificar se NUNCA foi chamado o 'findByEmail()' recebendo alguma string
+        then(usuarioRepository).should(never()).findByEmail(anyString());
+
+        // "Então Repository, você DEVERIA verificar se NUNCA foi chamado o save() recebendo entity alguma Usuario
+        then(usuarioRepository).should(never()).save(any(Usuario.class));
 
         // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
 
