@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,9 +19,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {
@@ -46,16 +46,18 @@ class UsuarioServiceTest {
 
         //ARRANGE (PREPARAR) - Configurar o ambiente
         //1- Simula que NÃO existe um usuário cadastrado com este e-mail, retornando false
-        BDDMockito.given(usuarioRepository.existsByEmail(usuarioRequest.email())).willReturn(false);
+        given(usuarioRepository.existsByEmail(usuarioRequest.email())).willReturn(false);
 
         //2- Simula o retorno do banco após o save(), atribuindo um ID ao usuário persistido.
         Usuario usuario = criarUsuario();
-        BDDMockito.given(usuarioRepository.save(any(Usuario.class))).willReturn(usuario);
+        given(usuarioRepository.save(any(Usuario.class))).willReturn(usuario);
 
         //ACT (AGIR) - A ação que se deseja testar é executada (método)
         UsuarioResponse response = usuarioService.cadastrar(usuarioRequest);
 
         //ASSERT (VERIFICAR) - Verifica se o resultado obtido após a ação está de acordo com o que se esperava do teste
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
 
         // "Então Repository, você DEVERIA verificar se foi chamado o 'save()' 1x para algum objeto Usuario.
         then(usuarioRepository).should().save(any(Usuario.class));
@@ -65,6 +67,8 @@ class UsuarioServiceTest {
 
         // "Verifique se o nome que eu esperava é igual ao nome que o método retornou."
         // assertEquals(valorEsperado, valorObtido);
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
 
         // Com assertAll, você recebe os erros de uma vez.
         Assertions.assertAll(
@@ -85,7 +89,7 @@ class UsuarioServiceTest {
         //ARRANGE (PREPARAR) - Configurar o ambiente
 
         // Simula que já existe um usuário cadastrado com este e-mail, retornando true
-        BDDMockito.given(usuarioRepository.existsByEmail(usuarioRequest.email())).willReturn(true);
+        given(usuarioRepository.existsByEmail(usuarioRequest.email())).willReturn(true);
 
         //ACT + ASSERT
 
@@ -94,6 +98,16 @@ class UsuarioServiceTest {
         RegraNegocioException exception = Assertions.assertThrows(
                 RegraNegocioException.class,
                 () -> usuarioService.cadastrar(usuarioRequest)); // "() -> Aqui está um código que pode explodir. Execute e veja se explode com a exceção correta."
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o 'existsByEmail()' aconteceu 1x para o e-mail informado.
+        then(usuarioRepository).should().existsByEmail(usuarioRequest.email());
+
+        // Então Repository, você DEVERIA verificar que o 'save()' NUNCA aconteceu para o objeto Usuario.
+        then(usuarioRepository).should(never()).save(any(Usuario.class));
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
 
         // Verificando se o valor esperado é igual ao obtido para os atributos da exceção: message e status
         Assertions.assertAll(
@@ -104,28 +118,25 @@ class UsuarioServiceTest {
                         HttpStatus.CONFLICT,
                         exception.getStatus())
         );
-
-        // Então Repository, você DEVERIA verificar que o 'existsByEmail()' aconteceu 1x para o e-mail informado.
-        then(usuarioRepository).should().existsByEmail(usuarioRequest.email());
-
-        // Então Repository, você DEVERIA verificar que o 'save()' NUNCA aconteceu para o objeto Usuario.
-        then(usuarioRepository).should(never()).save(any(Usuario.class));
-
     }
 
     @Test
     void deveriaListarUsuariosQuandoTiverCadastrados() {
         // ARRANGE
         Usuario usuario = criarUsuario();
-        BDDMockito.given(usuarioRepository.findAll()).willReturn(List.of(usuario));
+        given(usuarioRepository.findAll()).willReturn(List.of(usuario));
 
         // ACT
         List<UsuarioResponse> listResponse = usuarioService.listar();
 
         // ASSERT
 
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
         // Então Repository, você DEVERIA verificar que o 'findAll()' aconteceu 1x para o objeto Usuario.
         then(usuarioRepository).should().findAll();
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
 
         // "Verifique se o nome que eu esperava é igual ao nome que o método retornou."
         // assertEquals(valorEsperado, valorObtido);
@@ -142,15 +153,19 @@ class UsuarioServiceTest {
     @Test
     void deveriaRetornarListaVaziaQuandoNaoTiverUsuariosCadastrados() {
         // 1 - ARRANGE
-        BDDMockito.given(usuarioRepository.findAll()).willReturn(List.of()); // lista imutável vazia
+        given(usuarioRepository.findAll()).willReturn(List.of()); // lista imutável vazia
 
         // 2 - ACT
         List<UsuarioResponse> listResponse = usuarioService.listar();
 
         // 3 - ASSERT
 
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
         // Então Repository, você DEVERIA verificar que o 'findAll()' aconteceu 1x para o objeto Usuario.
         then(usuarioRepository).should().findAll();
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
 
         // "Verifique se o método retornou uma lista vazia"
         Assertions.assertTrue(listResponse.isEmpty()); // Verifica se é verdade que a lista deve estar vazia
@@ -162,16 +177,20 @@ class UsuarioServiceTest {
         // 1 - Arrange
         Usuario usuario = criarUsuario();
 
-        // "QUANDO o método findById() do usuarioRepository for chamado passando esse ID, ENTÃO devolva um Optional contendo esse usuário."
-        when(usuarioRepository.findById(usuario.getId())).thenReturn(Optional.of(usuario));
+        // "QUANDO o método findById() do usuarioRepository for chamado passando esse ID, VOLTARÁ um Optional contendo esse usuário."
+        given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
 
         // 2 - ACT
         UsuarioResponse usuarioResponse = usuarioService.listarPorId(usuario.getId());
 
         // 3 - ASSERT
 
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
         // Então Repository, você DEVERIA verificar que o 'findById()' aconteceu 1x passando o ID do Usuario.
         then(usuarioRepository).should().findById(usuario.getId());
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
 
         // Verificando se o valor esperado é igual ao valor retornado pelo service
         Assertions.assertAll(
@@ -188,14 +207,21 @@ class UsuarioServiceTest {
         Long id = 1L;
 
         // QUANDO o método findById() do usuarioRepository for chamado passando esse ID,
-        // ENTÃO devolva um Optional vazio simulando usuário inexistente
-        when(usuarioRepository.findById(id)).thenReturn(Optional.empty());
+        // VOLTARÁ um Optional vazio simulando usuário inexistente
+        given(usuarioRepository.findById(id)).willReturn(Optional.empty());
 
         // 2 - ACT + Assert
         RegraNegocioException exception = Assertions.assertThrows(
                 RegraNegocioException.class,
                 () -> usuarioService.listarPorId(id)
         );
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o 'findById()' aconteceu 1x passando o ID do Usuario.
+        then(usuarioRepository).should().findById(1L);
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
 
         // Verificando se o valor esperado é igual ao obtido para os atributos da exceção: message e status
         Assertions.assertAll(
@@ -207,8 +233,6 @@ class UsuarioServiceTest {
                         exception.getStatus())
         );
 
-        // Então Repository, você DEVERIA verificar que o 'findById()' aconteceu 1x passando o ID do Usuario.
-        then(usuarioRepository).should().findById(1L);
     }
 
     @Test
@@ -217,27 +241,29 @@ class UsuarioServiceTest {
 
         // Busca o id no banco pra saber se o usuário existe
         Usuario usuario = criarUsuario();
-        BDDMockito.given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
+        given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
 
         // Verificar se existe OUTRO usuário com o e-mail informado
-        BDDMockito.given(usuarioRepository.findByEmail(usuarioRequest.email())).willReturn(Optional.empty());
+        given(usuarioRepository.findByEmail(usuarioRequest.email())).willReturn(Optional.empty());
 
         // Simula o retorno do banco após o save(), devolvendo a entidade persistida.
-        BDDMockito.given(usuarioRepository.save(any(Usuario.class))).willReturn(usuario);
+        given(usuarioRepository.save(any(Usuario.class))).willReturn(usuario);
 
         // 2 - ACT
         UsuarioResponse usuarioResponse = usuarioService.atualizar(usuario.getId(), usuarioRequest);
 
         // 3 - ASSERT
 
-        // Behavior verification
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
         then(usuarioRepository).should().findById(usuario.getId());
         then(usuarioRepository).should().findByEmail(usuarioRequest.email());
 
         // "Então Repository, você DEVERIA verificar se foi chamado o 'save()' 1x para algum objeto Usuario.
         then(usuarioRepository).should().save(any(Usuario.class));
 
-        // State verification
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
+
         Assertions.assertAll(
                 () -> Assertions.assertEquals(usuario.getId(), usuarioResponse.id()),
                 () -> Assertions.assertEquals(usuarioRequest.nome(), usuarioResponse.nome()),
@@ -253,7 +279,7 @@ class UsuarioServiceTest {
 
         // Busca o id no banco pra saber se o usuário existe
         Long id = 1L;
-        BDDMockito.given(usuarioRepository.findById(id)).willReturn(Optional.empty());
+        given(usuarioRepository.findById(id)).willReturn(Optional.empty());
 
         // 2 - ACT + 3 - ASSERT
 
@@ -266,6 +292,12 @@ class UsuarioServiceTest {
 
         // "Então Repository, você DEVERIA verificar se foi chamado o 'findById()' 1x passando o id do Usuário.
         then(usuarioRepository).should().findById(id);
+
+        // "Então Repository, você DEVERIA verificar se NUNCA foi chamado o 'findByEmail()' recebendo alguma string
+        then(usuarioRepository).should(never()).findByEmail(anyString());
+
+        // "Então Repository, você DEVERIA verificar se NUNCA foi chamado o save() recebendo entity alguma Usuario
+        then(usuarioRepository).should(never()).save(any(Usuario.class));
 
         // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
 
@@ -288,7 +320,7 @@ class UsuarioServiceTest {
 
         // Busca o id no banco pra saber se o usuário existe
         Usuario usuario = criarUsuario();
-        BDDMockito.given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
+        given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
 
         // Outro usuario
         Usuario outroUsuario = new Usuario(
@@ -298,7 +330,7 @@ class UsuarioServiceTest {
         ReflectionTestUtils.setField(outroUsuario, "id", 2L);
 
         // Verificar se existe OUTRO usuário com o e-mail informado
-        BDDMockito.given(usuarioRepository.findByEmail(usuarioRequest.email())).willReturn(Optional.of(outroUsuario));
+        given(usuarioRepository.findByEmail(usuarioRequest.email())).willReturn(Optional.of(outroUsuario));
 
         // 2 - ACT + 3 - ASSERT
         RegraNegocioException exception = Assertions.assertThrows(
@@ -336,19 +368,21 @@ class UsuarioServiceTest {
         // 1 - Arrange
         Usuario usuario = criarUsuario();
 
-        // "QUANDO o método findById() do usuarioRepository for chamado passando esse ID, ENTÃO devolva um Optional contendo esse usuário."
-        when(usuarioRepository.findById(usuario.getId())).thenReturn(Optional.of(usuario));
+        // "QUANDO o método findById() do usuarioRepository for chamado passando esse ID, VOLTARÁ um Optional contendo esse usuário."
+        given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
 
         // 2 - ACT
         usuarioService.deletar(usuario.getId());
 
         // 3 - ASSERT
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
         // Então Repository, você DEVERIA verificar que o 'findById()' aconteceu 1x passando o ID do Usuario.
         then(usuarioRepository).should().findById(usuario.getId());
 
         // Então Repository, você DEVERIA verificar que o 'deleteById()' aconteceu 1x passando o objeto Usuario.
         then(usuarioRepository).should().delete(usuario);
-
     }
 
     @Test
@@ -358,13 +392,23 @@ class UsuarioServiceTest {
         Long id = 1L;
 
         // Simula que não existe usuário cadastrado com o ID informado, returnando um Optional vazio
-        when(usuarioRepository.findById(id)).thenReturn(Optional.empty());
+        given(usuarioRepository.findById(id)).willReturn(Optional.empty());
 
         // 2 - ACT + ASSERT
         RegraNegocioException exception = Assertions.assertThrows(
                 RegraNegocioException.class,
                 () -> usuarioService.deletar(id)
         );
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o 'findById()' aconteceu 1x passando o ID do Usuario.
+        then(usuarioRepository).should().findById(id);
+
+        // Então Repository, você DEVERIA verificar que o 'delete()' NUNCA aconteceu passando o objeto Usuario.
+        then(usuarioRepository).should(never()).delete(any(Usuario.class));
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
 
         // Verificando se o valor esperado é igual ao obtido para os atributos da exceção: message e status
         Assertions.assertAll(
@@ -376,13 +420,6 @@ class UsuarioServiceTest {
                         exception.getStatus()
                 )
         );
-
-        // Então Repository, você DEVERIA verificar que o 'findById()' aconteceu 1x passando o ID do Usuario.
-        then(usuarioRepository).should().findById(id);
-
-        // Então Repository, você DEVERIA verificar que o 'delete()' NUNCA aconteceu passando o objeto Usuario.
-        then(usuarioRepository).should(never()).delete(any(Usuario.class));
-
     }
 
     private Usuario criarUsuario() {

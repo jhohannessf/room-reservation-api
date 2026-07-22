@@ -39,7 +39,7 @@ public class SalaService {
 
     }
 
-    public List<SalaResponse> lista() {
+    public List<SalaResponse> listar() {
 
         // Busca a lista de Sala Entity, transformando em Resposta DTO e depois em uma lista
         return salaRepository.findAll().stream()
@@ -48,17 +48,9 @@ public class SalaService {
     }
 
     public SalaResponse listarPorId(Long id) {
-        // Verificar se a sala existe
-        boolean verificarSala = salaRepository.existsById(id);
-        if (!verificarSala) {
-            throw new RegraNegocioException("Não existe sala com o id: " + id,
-                    HttpStatus.NOT_FOUND);
-        }
-        // Pega a referência da sala no banco
-        Sala sala = salaRepository.getReferenceById(id);
-
-        // Retorna transformando a Entity Sala em um DTO SalaResponse
-        return SalaMapper.toResponse(sala);
+        // Verificar se a sala existe com o método buscaPorId()
+        // Retorna transformando a Entity Sala em um DTO SalaResponse usando o método toResponse do SalaMapper
+        return SalaMapper.toResponse(buscaPorId(id));
 
     }
 
@@ -82,22 +74,22 @@ public class SalaService {
 
     @Transactional
     public void deletar(Long id) {
-        // Busca se a sala existe no banco
-        buscaPorId(id);
+        // Captura a Busca se a sala existe no banco
+        Sala sala = buscaPorId(id);
 
-        // Se existe, deleta pelo ID.
-        salaRepository.deleteById(id);
+        // Se existe, deleta
+        salaRepository.delete(sala);
     }
 
     public Sala buscaPorId(Long id) {
         return salaRepository.findById(id)
-                .orElseThrow(() -> new RegraNegocioException("Sala com id " + id + " não encontrado.",
+                .orElseThrow(() -> new RegraNegocioException("Sala com id " + id + " não encontrada.",
                         HttpStatus.NOT_FOUND));
     }
 
     private void verificaSalaExistentePorNumero(SalaRequest salaRequest) {
         if (salaRepository.existsByNumero(salaRequest.numero())) {
-            throw new RegraNegocioException("Sala já cadastrado com este número",
+            throw new RegraNegocioException("Sala já cadastrada com este número.",
                     HttpStatus.CONFLICT);
         }
     }
@@ -107,7 +99,7 @@ public class SalaService {
         if (outraSala.isPresent()) {
             Sala salaComMesmoNumero = outraSala.get();
             if (!salaComMesmoNumero.getId().equals(id)) {
-                throw new RegraNegocioException("Sala já cadastrado com este número",
+                throw new RegraNegocioException("Sala já cadastrada com este número.",
                         HttpStatus.CONFLICT);
             }
         }
