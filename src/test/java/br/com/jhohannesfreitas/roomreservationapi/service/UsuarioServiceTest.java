@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,9 +19,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {
@@ -46,11 +45,11 @@ class UsuarioServiceTest {
 
         //ARRANGE (PREPARAR) - Configurar o ambiente
         //1- Simula que NÃO existe um usuário cadastrado com este e-mail, retornando false
-        BDDMockito.given(usuarioRepository.existsByEmail(usuarioRequest.email())).willReturn(false);
+        given(usuarioRepository.existsByEmail(usuarioRequest.email())).willReturn(false);
 
         //2- Simula o retorno do banco após o save(), atribuindo um ID ao usuário persistido.
         Usuario usuario = criarUsuario();
-        BDDMockito.given(usuarioRepository.save(any(Usuario.class))).willReturn(usuario);
+        given(usuarioRepository.save(any(Usuario.class))).willReturn(usuario);
 
         //ACT (AGIR) - A ação que se deseja testar é executada (método)
         UsuarioResponse response = usuarioService.cadastrar(usuarioRequest);
@@ -89,7 +88,7 @@ class UsuarioServiceTest {
         //ARRANGE (PREPARAR) - Configurar o ambiente
 
         // Simula que já existe um usuário cadastrado com este e-mail, retornando true
-        BDDMockito.given(usuarioRepository.existsByEmail(usuarioRequest.email())).willReturn(true);
+        given(usuarioRepository.existsByEmail(usuarioRequest.email())).willReturn(true);
 
         //ACT + ASSERT
 
@@ -124,7 +123,7 @@ class UsuarioServiceTest {
     void deveriaListarUsuariosQuandoTiverCadastrados() {
         // ARRANGE
         Usuario usuario = criarUsuario();
-        BDDMockito.given(usuarioRepository.findAll()).willReturn(List.of(usuario));
+        given(usuarioRepository.findAll()).willReturn(List.of(usuario));
 
         // ACT
         List<UsuarioResponse> listResponse = usuarioService.listar();
@@ -153,7 +152,7 @@ class UsuarioServiceTest {
     @Test
     void deveriaRetornarListaVaziaQuandoNaoTiverUsuariosCadastrados() {
         // 1 - ARRANGE
-        BDDMockito.given(usuarioRepository.findAll()).willReturn(List.of()); // lista imutável vazia
+        given(usuarioRepository.findAll()).willReturn(List.of()); // lista imutável vazia
 
         // 2 - ACT
         List<UsuarioResponse> listResponse = usuarioService.listar();
@@ -177,8 +176,8 @@ class UsuarioServiceTest {
         // 1 - Arrange
         Usuario usuario = criarUsuario();
 
-        // "QUANDO o método findById() do usuarioRepository for chamado passando esse ID, ENTÃO devolva um Optional contendo esse usuário."
-        when(usuarioRepository.findById(usuario.getId())).thenReturn(Optional.of(usuario));
+        // "QUANDO o método findById() do usuarioRepository for chamado passando esse ID, VOLTARÁ um Optional contendo esse usuário."
+        given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
 
         // 2 - ACT
         UsuarioResponse usuarioResponse = usuarioService.listarPorId(usuario.getId());
@@ -207,8 +206,8 @@ class UsuarioServiceTest {
         Long id = 1L;
 
         // QUANDO o método findById() do usuarioRepository for chamado passando esse ID,
-        // ENTÃO devolva um Optional vazio simulando usuário inexistente
-        when(usuarioRepository.findById(id)).thenReturn(Optional.empty());
+        // VOLTARÁ um Optional vazio simulando usuário inexistente
+        given(usuarioRepository.findById(id)).willReturn(Optional.empty());
 
         // 2 - ACT + Assert
         RegraNegocioException exception = Assertions.assertThrows(
@@ -241,13 +240,13 @@ class UsuarioServiceTest {
 
         // Busca o id no banco pra saber se o usuário existe
         Usuario usuario = criarUsuario();
-        BDDMockito.given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
+        given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
 
         // Verificar se existe OUTRO usuário com o e-mail informado
-        BDDMockito.given(usuarioRepository.findByEmail(usuarioRequest.email())).willReturn(Optional.empty());
+        given(usuarioRepository.findByEmail(usuarioRequest.email())).willReturn(Optional.empty());
 
         // Simula o retorno do banco após o save(), devolvendo a entidade persistida.
-        BDDMockito.given(usuarioRepository.save(any(Usuario.class))).willReturn(usuario);
+        given(usuarioRepository.save(any(Usuario.class))).willReturn(usuario);
 
         // 2 - ACT
         UsuarioResponse usuarioResponse = usuarioService.atualizar(usuario.getId(), usuarioRequest);
@@ -279,7 +278,7 @@ class UsuarioServiceTest {
 
         // Busca o id no banco pra saber se o usuário existe
         Long id = 1L;
-        BDDMockito.given(usuarioRepository.findById(id)).willReturn(Optional.empty());
+        given(usuarioRepository.findById(id)).willReturn(Optional.empty());
 
         // 2 - ACT + 3 - ASSERT
 
@@ -314,7 +313,7 @@ class UsuarioServiceTest {
 
         // Busca o id no banco pra saber se o usuário existe
         Usuario usuario = criarUsuario();
-        BDDMockito.given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
+        given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
 
         // Outro usuario
         Usuario outroUsuario = new Usuario(
@@ -324,7 +323,7 @@ class UsuarioServiceTest {
         ReflectionTestUtils.setField(outroUsuario, "id", 2L);
 
         // Verificar se existe OUTRO usuário com o e-mail informado
-        BDDMockito.given(usuarioRepository.findByEmail(usuarioRequest.email())).willReturn(Optional.of(outroUsuario));
+        given(usuarioRepository.findByEmail(usuarioRequest.email())).willReturn(Optional.of(outroUsuario));
 
         // 2 - ACT + 3 - ASSERT
         RegraNegocioException exception = Assertions.assertThrows(
@@ -362,8 +361,8 @@ class UsuarioServiceTest {
         // 1 - Arrange
         Usuario usuario = criarUsuario();
 
-        // "QUANDO o método findById() do usuarioRepository for chamado passando esse ID, ENTÃO devolva um Optional contendo esse usuário."
-        when(usuarioRepository.findById(usuario.getId())).thenReturn(Optional.of(usuario));
+        // "QUANDO o método findById() do usuarioRepository for chamado passando esse ID, VOLTARÁ um Optional contendo esse usuário."
+        given(usuarioRepository.findById(usuario.getId())).willReturn(Optional.of(usuario));
 
         // 2 - ACT
         usuarioService.deletar(usuario.getId());
@@ -386,7 +385,7 @@ class UsuarioServiceTest {
         Long id = 1L;
 
         // Simula que não existe usuário cadastrado com o ID informado, returnando um Optional vazio
-        when(usuarioRepository.findById(id)).thenReturn(Optional.empty());
+        given(usuarioRepository.findById(id)).willReturn(Optional.empty());
 
         // 2 - ACT + ASSERT
         RegraNegocioException exception = Assertions.assertThrows(
