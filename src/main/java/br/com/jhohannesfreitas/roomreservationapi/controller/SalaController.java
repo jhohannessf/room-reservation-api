@@ -56,7 +56,7 @@ public class SalaController {
     @GetMapping
     public ResponseEntity<List<SalaResponse>> listar() {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(salaService.lista());
+                .body(salaService.listar());
     }
 
     @Operation(

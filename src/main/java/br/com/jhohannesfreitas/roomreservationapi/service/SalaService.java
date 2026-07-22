@@ -39,7 +39,7 @@ public class SalaService {
 
     }
 
-    public List<SalaResponse> lista() {
+    public List<SalaResponse> listar() {
 
         // Busca a lista de Sala Entity, transformando em Resposta DTO e depois em uma lista
         return salaRepository.findAll().stream()
