@@ -89,7 +89,7 @@ public class SalaService {
 
     private void verificaSalaExistentePorNumero(SalaRequest salaRequest) {
         if (salaRepository.existsByNumero(salaRequest.numero())) {
-            throw new RegraNegocioException("Sala já cadastrado com este número",
+            throw new RegraNegocioException("Sala já cadastrada com este número.",
                     HttpStatus.CONFLICT);
         }
     }
@@ -99,7 +99,7 @@ public class SalaService {
         if (outraSala.isPresent()) {
             Sala salaComMesmoNumero = outraSala.get();
             if (!salaComMesmoNumero.getId().equals(id)) {
-                throw new RegraNegocioException("Sala já cadastrado com este número",
+                throw new RegraNegocioException("Sala já cadastrada com este número.",
                         HttpStatus.CONFLICT);
             }
         }
