@@ -83,7 +83,7 @@ public class SalaService {
 
     public Sala buscaPorId(Long id) {
         return salaRepository.findById(id)
-                .orElseThrow(() -> new RegraNegocioException("Sala com id " + id + " não encontrado.",
+                .orElseThrow(() -> new RegraNegocioException("Sala com id " + id + " não encontrada.",
                         HttpStatus.NOT_FOUND));
     }
 
