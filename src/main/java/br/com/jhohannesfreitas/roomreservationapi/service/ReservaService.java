@@ -125,7 +125,7 @@ public class ReservaService {
 
     private Reserva buscarReservaPorId(Long id) {
         return reservaRepository.findById(id)
-                .orElseThrow(() -> new RegraNegocioException("Reserva com id " + id + " não encontrado.",
+                .orElseThrow(() -> new RegraNegocioException("Reserva com id " + id + " não encontrada.",
                         HttpStatus.NOT_FOUND));
     }
 
@@ -137,7 +137,7 @@ public class ReservaService {
 
     private Sala buscaSalaPorId(Long id) {
         return salaRepository.findById(id)
-                .orElseThrow(() -> new RegraNegocioException("Sala com id " + id + " não encontrado.",
+                .orElseThrow(() -> new RegraNegocioException("Sala com id " + id + " não encontrada.",
                         HttpStatus.NOT_FOUND));
     }
 
