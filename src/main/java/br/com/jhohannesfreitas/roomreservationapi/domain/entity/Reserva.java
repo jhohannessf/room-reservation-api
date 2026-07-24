@@ -91,6 +91,10 @@ public class Reserva {
         this.horaFinal = hora_final;
     }
 
+    public void alterarData(LocalDate data) {
+        this.data = data;
+    }
+
     public void atualizar(ReservaRequest reservaRequest, Usuario usuario, Sala sala) {
         this.data = reservaRequest.data();
         this.horaInicial = reservaRequest.horaInicial();
