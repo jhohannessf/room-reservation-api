@@ -136,7 +136,7 @@ class SalaServiceTest {
     }
 
     @Test
-    void deveriaRetornarListaVaziaQuandoNaoTiverSalasCadastradas() {
+    void deveriaRetornarListaVaziaQuandoNaoExistiremSalasCadastradas() {
         // ARRANGE
 
         given(salaRepository.findAll()).willReturn(List.of());
