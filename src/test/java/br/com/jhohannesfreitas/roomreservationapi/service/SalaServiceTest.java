@@ -184,7 +184,7 @@ class SalaServiceTest {
     }
 
     @Test
-    void naoDeveriaBuscarSalaPorIdQuandoNaoTiverCadastrada() {
+    void deveriaLancarExcecaoQuandoBuscarSalaPorIdInexistente() {
         // ARRANGE
         Long id = 1L;
         given(salaRepository.findById(id)).willReturn(Optional.empty());
