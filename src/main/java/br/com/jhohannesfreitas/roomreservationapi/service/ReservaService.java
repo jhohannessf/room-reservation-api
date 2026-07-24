@@ -207,7 +207,7 @@ public class ReservaService {
             // 2- Se existir um horário reservado que termine DEPOIS(AFTER) do horário inicial passado na requisição
             if (reservaExistente.getHoraInicial().isBefore(reservaRequest.horaFinal())
                     && reservaExistente.getHoraFinal().isAfter(reservaRequest.horaInicial())) {
-                throw new RegraNegocioException("Horário inválido, já existe reserva para o horário informado",
+                throw new RegraNegocioException("Conflito de horário. Já existe uma reserva para o período informado.",
                         HttpStatus.CONFLICT);
             }
         }
