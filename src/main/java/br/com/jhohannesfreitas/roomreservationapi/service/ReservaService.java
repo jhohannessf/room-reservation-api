@@ -182,15 +182,6 @@ public class ReservaService {
         }
     }
 
-    private void validarCapacidade(Integer quantidade, Integer capacidade) {
-        //A capacidade positiva já é validada com a anotação
-        // Validar se a capacidade da sala é menor a capacidade informada na reserva
-        if (quantidade > capacidade) {
-            throw new RegraNegocioException("Quantidade de pessoas é superior a capacidade máxima pertimita para a sala reservada.",
-                    HttpStatus.CONFLICT);
-        }
-    }
-
     private void validarConflitoHorarioCadastro(ReservaRequest reservaRequest) {
         // A mesma sala não pode ter reservas sobrepostas
         // Reservas com Status canceladas não entram em checagem de conflitos
@@ -210,6 +201,15 @@ public class ReservaService {
                 throw new RegraNegocioException("Conflito de horário. Já existe uma reserva para o período informado.",
                         HttpStatus.CONFLICT);
             }
+        }
+    }
+
+    private void validarCapacidade(Integer quantidade, Integer capacidade) {
+        //A capacidade positiva já é validada com a anotação
+        // Validar se a capacidade da sala é menor a capacidade informada na reserva
+        if (quantidade > capacidade) {
+            throw new RegraNegocioException("A quantidade de pessoas excede a capacidade máxima da sala.",
+                    HttpStatus.CONFLICT);
         }
     }
 
