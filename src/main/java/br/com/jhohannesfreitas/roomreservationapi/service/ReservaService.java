@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReservaService {
@@ -48,14 +47,17 @@ public class ReservaService {
         //Validar se a data é anterior a data atual
         validarDataNaoPodeSerNoPassado(reservaRequest.data());
 
-        //Validar Hora
-        validarIntervaloHorario(reservaRequest.horaInicial(), reservaRequest.horaFinal());
+        // Valida intervalo entre as reservas
+        validarIntervaloReserva(reservaRequest.horaInicial(), reservaRequest.horaFinal());
+
+        // Valida horário de funcionamento
+        validarHorarioFuncionamento(reservaRequest.horaInicial(), reservaRequest.horaFinal());
+
+        // validar conflitos de horário
+        validarConflitoHorarioCadastro(reservaRequest);
 
         //Validar Capacidade
         validarCapacidade(reservaRequest.quantidadePessoas(), sala.getCapacidade());
-
-        // Validar conflitos Reserva
-        validarConflitoHorarioReserva(reservaRequest);
 
         // Converte o meu DTO ReservaRequest para entity Reserva
         Reserva reserva = ReservaMapper.toEntity(reservaRequest, usuario, sala);
@@ -95,14 +97,17 @@ public class ReservaService {
         // Valida a Data
         validarDataNaoPodeSerNoPassado(reservaRequest.data());
 
-        // Valida intervalo horário
-        validarIntervaloHorario(reservaRequest.horaInicial(), reservaRequest.horaFinal());
+        // Valida intervalo entre as reservas
+        validarIntervaloReserva(reservaRequest.horaInicial(), reservaRequest.horaFinal());
 
-        // Validar capacidade
-        validarCapacidade(reservaRequest.quantidadePessoas(), sala.getCapacidade());
+        // Valida horário de funcionamento
+        validarHorarioFuncionamento(reservaRequest.horaInicial(), reservaRequest.horaFinal());
 
         // Validar conflitos de horário, menos para o id da reserva
         validarConflitoHorarioAtualizacao(reservaRequest.salaId(),reservaRequest.data(),reservaRequest.horaInicial(),reservaRequest.horaFinal(),StatusReserva.ATIVA,id);
+
+        // Validar capacidade
+        validarCapacidade(reservaRequest.quantidadePessoas(), sala.getCapacidade());
 
         // Atualizar a Entity Reserva com dados DTO
         reserva.atualizar(reservaRequest, usuario,  sala);
@@ -158,14 +163,21 @@ public class ReservaService {
         }
     }
 
-    private void validarIntervaloHorario(LocalTime horaInicial, LocalTime horaFinal) {
+    private void validarHorarioFuncionamento(LocalTime horaInicial, LocalTime horaFinal) {
         LocalTime abertura = LocalTime.of(8, 0);
         LocalTime fechamento = LocalTime.of(18, 0);
         if (horaInicial.isBefore(abertura)
-                || horaFinal.isAfter(fechamento)
-                || !horaInicial.isBefore(horaFinal)) {
+                || horaFinal.isAfter(fechamento)) {
             throw new RegraNegocioException(
-                    "Horário inválido. Reservas devem ocorrer entre 08:00 e 18:00.",
+                    "Reservas devem ocorrer entre 08:00 e 18:00.",
+                    HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private void validarIntervaloReserva(LocalTime horaInicial, LocalTime horaFinal) {
+        if (!horaInicial.isBefore(horaFinal)) {
+            throw new RegraNegocioException(
+                    "A hora inicial deve ser anterior à hora final.",
                     HttpStatus.BAD_REQUEST);
         }
     }
@@ -179,7 +191,7 @@ public class ReservaService {
         }
     }
 
-    private void validarConflitoHorarioReserva(ReservaRequest reservaRequest) {
+    private void validarConflitoHorarioCadastro(ReservaRequest reservaRequest) {
         // A mesma sala não pode ter reservas sobrepostas
         // Reservas com Status canceladas não entram em checagem de conflitos
         // Documente exemplos-limite (fim igual ao início é permitido).
