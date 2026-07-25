@@ -219,7 +219,7 @@ public class ReservaService {
         for (Reserva reservaExistente : listaReservas) {
             if (reservaExistente.getHoraInicial().isBefore(horaFinal)
                     && reservaExistente.getHoraFinal().isAfter(horaInicial)) {
-                throw new RegraNegocioException("Horário inválido, já existe reserva para o horário informado",
+                throw new RegraNegocioException("Conflito de horário. Já existe uma reserva para o período informado.",
                         HttpStatus.CONFLICT);
             }
         }
