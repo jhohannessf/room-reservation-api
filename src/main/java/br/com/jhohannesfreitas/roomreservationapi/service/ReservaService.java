@@ -82,14 +82,15 @@ public class ReservaService {
 
     @Transactional
     public ReservaResponse atualizar(Long id, ReservaRequest reservaRequest) {
-        // Verifica se a Reserva existe
-        Reserva reserva = buscarReservaPorId(id);
 
         // Verificar se o usuário existe
         Usuario usuario = buscarUsuarioPorId(reservaRequest.usuarioId());
 
         // Verifica se a sala existe
         Sala sala = buscaSalaPorId(reservaRequest.salaId());
+
+        // Verifica se a Reserva existe
+        Reserva reserva = buscarReservaPorId(id);
 
         // Valida Status da Sala = Livre
         validarStatusSala(sala);
