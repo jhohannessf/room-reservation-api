@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -660,6 +661,238 @@ class ReservaServiceTest {
         // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
 
         Assertions.assertTrue(listaReservaResponse.isEmpty());
+    }
+
+    @Test
+    void deveriaListarReservasCadastradasPaginadas() {
+        // ARRANGE
+
+        // Cria um usuário para a reserva.
+        Usuario usuario = criarUsuario();
+
+        // Cria uma sala para a reserva.
+        Sala sala = criarSala();
+
+        // Cria reservas para listar
+        Reserva reserva = criarReserva(usuario, sala);
+
+        Reserva reserva2 = new Reserva(
+                LocalDate.now(),
+                LocalTime.of(8, 0, 0),
+                LocalTime.of(9, 0, 0),
+                20
+        );
+        reserva2.setUsuario(usuario);
+        reserva2.setSala(sala);
+
+        // Paginação
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("data").ascending());
+        Page<Reserva> pagina = new PageImpl<>(List.of(reserva, reserva2), pageable, 2);
+
+        given(reservaRepository.findAll(pageable)).willReturn(pagina);
+
+
+        // ACT
+        Page<ReservaResponse> reservaResponse = reservaService.listarPorPaginacao(pageable);
+        ReservaResponse primeiraReserva = reservaResponse.getContent().getFirst();
+        ReservaResponse segundaReserva = reservaResponse.getContent().get(1);
+
+        // ASSERT
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o método findAll(Pageable) foi chamado.
+        then(reservaRepository).should().findAll(pageable);
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
+
+        Assertions.assertAll(
+
+                // Informações da paginação
+                () -> Assertions.assertEquals(2, reservaResponse.getNumberOfElements()), // verificar a quantidade de elementos na página atual
+                () -> Assertions.assertEquals(2, reservaResponse.getTotalElements()), // verificar a quantidade total de registros
+                () -> Assertions.assertEquals(1, reservaResponse.getTotalPages()), // verificar a quantidade total de páginas
+                () -> Assertions.assertEquals(0, reservaResponse.getNumber()), // verificar o número da página atual
+                () -> Assertions.assertEquals(10, reservaResponse.getSize()), // verificar o tamanho da página
+                () -> Assertions.assertEquals(2, reservaResponse.getContent().size()), // Verificar a quantidade de elementos retornados
+                () -> Assertions.assertEquals(pageable.getSort(), reservaResponse.getSort()), // verificar a ordenação
+                () -> Assertions.assertTrue(reservaResponse.isFirst()), // Verifica se é verdade que a página retornada é a primeira
+                () -> Assertions.assertTrue(reservaResponse.isLast()),  // Verifica se é verdade que a página retornada é a última
+
+                // Primeira reserva
+                () -> Assertions.assertEquals(usuario.getId(), primeiraReserva.usuarioId()),
+                () -> Assertions.assertEquals(sala.getId(), primeiraReserva.salaId()),
+                () -> Assertions.assertEquals(reserva.getData(), primeiraReserva.data()),
+                () -> Assertions.assertEquals(reserva.getHoraInicial(), primeiraReserva.horaInicio()),
+                () -> Assertions.assertEquals(reserva.getHoraFinal(), primeiraReserva.horaFim()),
+                () -> Assertions.assertEquals(reserva.getQuantidadePessoas(), primeiraReserva.quantidadePessoas()),
+                () -> Assertions.assertEquals(reserva.getStatus(), primeiraReserva.status()),
+
+                // Segunda reserva
+                () -> Assertions.assertEquals(usuario.getId(), segundaReserva.usuarioId()),
+                () -> Assertions.assertEquals(sala.getId(), segundaReserva.salaId()),
+                () -> Assertions.assertEquals(reserva2.getData(), segundaReserva.data()),
+                () -> Assertions.assertEquals(reserva2.getHoraInicial(), segundaReserva.horaInicio()),
+                () -> Assertions.assertEquals(reserva2.getHoraFinal(), segundaReserva.horaFim()),
+                () -> Assertions.assertEquals(reserva2.getQuantidadePessoas(), segundaReserva.quantidadePessoas()),
+                () -> Assertions.assertEquals(reserva2.getStatus(), segundaReserva.status())
+        );
+    }
+
+    @Test
+    void deveriaRetornarPaginaVaziaQuandoNaoExistiremReservasCadastradas() {
+        // ARRANGE
+
+        // Paginação
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("data").ascending());
+        Page<Reserva> paginaVazia = Page.empty(pageable);
+
+        // Simula o retorno de uma página vazia
+        given(reservaRepository.findAll(pageable)).willReturn(paginaVazia);
+
+        // ACT
+        Page<ReservaResponse> reservaResponse = reservaService.listarPorPaginacao(pageable);
+
+        // ASSERT
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o 'findAll()' aconteceu
+        then(reservaRepository).should().findAll(pageable);
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
+
+        Assertions.assertAll(
+                () -> Assertions.assertTrue(reservaResponse.isEmpty()),
+                () -> Assertions.assertEquals(0, reservaResponse.getNumberOfElements()), // verificar a quantidade de elementos na página atual
+                () -> Assertions.assertEquals(0, reservaResponse.getTotalElements()), // verificar a quantidade total de registros
+                () -> Assertions.assertEquals(0, reservaResponse.getContent().size()), // Verificar a quantidade de elementos retornados
+
+                () -> Assertions.assertEquals(0, reservaResponse.getNumber()), // verificar o número da página atual
+                () -> Assertions.assertEquals(10, reservaResponse.getSize()), // verificar o tamanho da página
+                () -> Assertions.assertEquals(pageable.getSort(), reservaResponse.getSort()), // verificar a ordenação
+                () -> Assertions.assertTrue(reservaResponse.isFirst()), // Verifica se é verdade que a página retornada é a primeira
+                () -> Assertions.assertTrue(reservaResponse.isLast())  // Verifica se é verdade que a página retornada é a última
+        );
+
+    }
+
+    @Test
+    void deveriaListarReservasPorSalaEIntervaloPaginadas() {
+        // ARRANGE
+
+        // Cria um usuário para a reserva.
+        Usuario usuario = criarUsuario();
+
+        // Cria uma sala para a reserva.
+        Sala sala = criarSala();
+
+        // Cria reservas para compor a página retornada
+        Reserva reserva = criarReserva(usuario, sala);
+
+        Reserva reserva2 = new Reserva(
+                LocalDate.now(),
+                LocalTime.of(8, 0, 0),
+                LocalTime.of(9, 0, 0),
+                20
+        );
+        reserva2.setUsuario(usuario);
+        reserva2.setSala(sala);
+
+        // Paginação
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("data").ascending());
+        Page<Reserva> pagina = new PageImpl<>(List.of(reserva, reserva2), pageable, 2);
+
+        LocalDate inicio = LocalDate.of(2026, 7, 1);
+        LocalDate fim = LocalDate.of(2026, 7, 31);
+
+        given(reservaRepository.findBySalaIdAndDataBetweenAndStatus(sala.getId(), inicio, fim, StatusReserva.ATIVA, pageable)).willReturn(pagina);
+
+        // ACT
+        Page<ReservaResponse> reservaResponse = reservaService.listarReservasPorSalaEIntervalo(sala.getId(), inicio, fim, pageable);
+        ReservaResponse primeiraReserva = reservaResponse.getContent().getFirst();
+        ReservaResponse segundaReserva = reservaResponse.getContent().get(1);
+
+        // ASSERT
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o método findBySalaIdAndDataBetweenAndStatus() foi chamado.
+        then(reservaRepository).should().findBySalaIdAndDataBetweenAndStatus(sala.getId(), inicio, fim, StatusReserva.ATIVA, pageable);
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
+
+        Assertions.assertAll(
+
+                // Informações da paginação
+                () -> Assertions.assertEquals(2, reservaResponse.getNumberOfElements()), // verificar a quantidade de elementos na página atual
+                () -> Assertions.assertEquals(2, reservaResponse.getTotalElements()), // verificar a quantidade total de registros
+                () -> Assertions.assertEquals(1, reservaResponse.getTotalPages()), // verificar a quantidade total de páginas
+                () -> Assertions.assertEquals(0, reservaResponse.getNumber()), // verificar o número da página atual
+                () -> Assertions.assertEquals(2, reservaResponse.getContent().size()), // Verificar a quantidade de elementos retornados
+                () -> Assertions.assertEquals(10, reservaResponse.getSize()), // verificar o tamanho da página
+                () -> Assertions.assertEquals(pageable.getSort(), reservaResponse.getSort()), // verificar a ordenação
+                () -> Assertions.assertTrue(reservaResponse.isFirst()), // Verifica se é verdade que a página retornada é a primeira
+                () -> Assertions.assertTrue(reservaResponse.isLast()),  // Verifica se é verdade que a página retornada é a última
+
+                // Primeira reserva
+                () -> Assertions.assertEquals(usuario.getId(), primeiraReserva.usuarioId()),
+                () -> Assertions.assertEquals(sala.getId(), primeiraReserva.salaId()),
+                () -> Assertions.assertEquals(reserva.getData(), primeiraReserva.data()),
+                () -> Assertions.assertEquals(reserva.getHoraInicial(), primeiraReserva.horaInicio()),
+                () -> Assertions.assertEquals(reserva.getHoraFinal(), primeiraReserva.horaFim()),
+                () -> Assertions.assertEquals(reserva.getQuantidadePessoas(), primeiraReserva.quantidadePessoas()),
+                () -> Assertions.assertEquals(reserva.getStatus(), primeiraReserva.status()),
+
+                // Segunda reserva
+                () -> Assertions.assertEquals(usuario.getId(), segundaReserva.usuarioId()),
+                () -> Assertions.assertEquals(sala.getId(), segundaReserva.salaId()),
+                () -> Assertions.assertEquals(reserva2.getData(), segundaReserva.data()),
+                () -> Assertions.assertEquals(reserva2.getHoraInicial(), segundaReserva.horaInicio()),
+                () -> Assertions.assertEquals(reserva2.getHoraFinal(), segundaReserva.horaFim()),
+                () -> Assertions.assertEquals(reserva2.getQuantidadePessoas(), segundaReserva.quantidadePessoas()),
+                () -> Assertions.assertEquals(reserva2.getStatus(), segundaReserva.status())
+        );
+    }
+
+    @Test
+    void deveriaRetornarPaginaVaziaQuandoNaoExistiremReservasDaSalaNoIntervaloInformado() {
+        // ARRANGE
+
+        Long salaId = 1L;
+        LocalDate inicio = LocalDate.of(2026, 7, 1);
+        LocalDate fim = LocalDate.of(2026, 7, 31);
+
+        // Paginação
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("data").ascending());
+        Page<Reserva> paginaVazia = Page.empty(pageable);
+
+        given(reservaRepository.findBySalaIdAndDataBetweenAndStatus(salaId, inicio, fim, StatusReserva.ATIVA, pageable)).willReturn(paginaVazia);
+
+        // ACT
+        Page<ReservaResponse> reservaResponse = reservaService.listarReservasPorSalaEIntervalo(salaId, inicio, fim, pageable);
+
+        // ASSERT
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o método findBySalaIdAndDataBetweenAndStatus() foi chamado.
+        then(reservaRepository).should().findBySalaIdAndDataBetweenAndStatus(salaId, inicio, fim, StatusReserva.ATIVA, pageable);
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
+
+        Assertions.assertAll(
+                () -> Assertions.assertTrue(reservaResponse.isEmpty()),
+                () -> Assertions.assertEquals(0, reservaResponse.getNumberOfElements()), // verificar a quantidade de elementos na página atual
+                () -> Assertions.assertEquals(0, reservaResponse.getTotalElements()), // verificar a quantidade total de registros
+                () -> Assertions.assertEquals(0, reservaResponse.getContent().size()), // Verificar a quantidade de elementos retornados
+
+                () -> Assertions.assertEquals(0, reservaResponse.getNumber()), // verificar o número da página atual
+                () -> Assertions.assertEquals(10, reservaResponse.getSize()), // verificar o tamanho da página
+                () -> Assertions.assertEquals(pageable.getSort(), reservaResponse.getSort()), // verificar a ordenação
+                () -> Assertions.assertTrue(reservaResponse.isFirst()), // Verifica se é verdade que a página retornada é a primeira
+                () -> Assertions.assertTrue(reservaResponse.isLast())  // Verifica se é verdade que a página retornada é a última
+        );
     }
 
     @Test
