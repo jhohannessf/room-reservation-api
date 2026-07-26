@@ -2,6 +2,10 @@ package br.com.jhohannesfreitas.roomreservationapi.repository;
 
 import br.com.jhohannesfreitas.roomreservationapi.domain.entity.Reserva;
 import br.com.jhohannesfreitas.roomreservationapi.domain.enums.StatusReserva;
+import br.com.jhohannesfreitas.roomreservationapi.dto.ReservaResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
@@ -23,4 +27,6 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findBySalaIdAndDataAndStatus(Long salaId, LocalDate data, StatusReserva status);
 
     List<Reserva> findBySalaIdAndDataAndStatusAndIdNot(Long salaId, LocalDate data, StatusReserva status, Long idReserva);
+
+    Page<Reserva> findBySalaIdAndDataBetweenAndStatus(Long salaId, LocalDate dataInicio, LocalDate dataFim, StatusReserva status, Pageable pageable);
 }
