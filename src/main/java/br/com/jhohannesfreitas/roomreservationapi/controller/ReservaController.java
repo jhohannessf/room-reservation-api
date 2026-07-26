@@ -1,5 +1,6 @@
 package br.com.jhohannesfreitas.roomreservationapi.controller;
 
+import br.com.jhohannesfreitas.roomreservationapi.domain.enums.StatusReserva;
 import br.com.jhohannesfreitas.roomreservationapi.dto.ReservaRequest;
 import br.com.jhohannesfreitas.roomreservationapi.dto.ReservaResponse;
 import br.com.jhohannesfreitas.roomreservationapi.service.ReservaService;
@@ -8,10 +9,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -72,6 +79,50 @@ public class ReservaController {
     public ResponseEntity<List<ReservaResponse>> listar() {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(reservaService.listar());
+    }
+
+    @Operation(
+            summary = "Listar reservas paginadas",
+            description = """
+                Retorna uma lista paginada de reservas cadastradas.
+
+                É possível controlar a paginação utilizando os parâmetros:
+                - page: número da página (inicia em 0);
+                - size: quantidade de registros por página;
+                - sort: campo utilizado para ordenação, seguido da direção (asc ou desc).
+
+                Exemplo:
+                GET /api/v1/reservas/paginado?page=0&size=10&sort=data,desc
+                """
+    )
+    @GetMapping("/paginado")
+    public ResponseEntity<Page<ReservaResponse>> listarPorPaginacao(Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(reservaService.listarPorPaginacao(pageable));
+    }
+
+    @Operation(
+            summary = "Listar reservas por sala e intervalo de datas",
+            description = """
+                Retorna uma lista paginada de reservas ativas de uma sala
+                dentro de um intervalo de datas informado.
+
+                Parâmetros obrigatórios:
+                - salaId: identificador da sala;
+                - inicio: data inicial do intervalo (yyyy-MM-dd);
+                - fim: data final do intervalo (yyyy-MM-dd).
+
+                Também é possível utilizar paginação e ordenação através dos
+                parâmetros page, size e sort.
+
+                Exemplo:
+                GET /api/v1/reservas/sala/1?inicio=2026-07-01&fim=2026-07-31&page=0&size=10&sort=data,asc
+                """
+    )
+    @GetMapping("/sala/{id}")
+    public ResponseEntity<Page<ReservaResponse>> listarReservaPorSalaEIntervalo(@PathVariable Long id, @RequestParam LocalDate inicio, @RequestParam LocalDate fim, Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(reservaService.listarReservasPorSalaEIntervalo(id, inicio, fim, pageable));
     }
 
     @Operation(

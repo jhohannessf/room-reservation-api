@@ -12,6 +12,9 @@ import br.com.jhohannesfreitas.roomreservationapi.mapper.ReservaMapper;
 import br.com.jhohannesfreitas.roomreservationapi.repository.ReservaRepository;
 import br.com.jhohannesfreitas.roomreservationapi.repository.SalaRepository;
 import br.com.jhohannesfreitas.roomreservationapi.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,6 +77,22 @@ public class ReservaService {
                 .stream()
                 .map(ReservaMapper::toResponse)
                 .toList();
+    }
+
+    public Page<ReservaResponse> listarPorPaginacao(Pageable pageable) {
+        return reservaRepository.findAll(pageable)
+                .map(ReservaMapper::toResponse);
+    }
+
+    public Page<ReservaResponse> listarReservasPorSalaEIntervalo(Long salaId, LocalDate inicio, LocalDate fim, Pageable pageable) {
+        return reservaRepository.findBySalaIdAndDataBetweenAndStatus(
+                salaId,
+                inicio,
+                fim,
+                StatusReserva.ATIVA,
+                pageable
+        )
+                .map(ReservaMapper::toResponse);
     }
 
     public ReservaResponse listarPorId(Long id) {
