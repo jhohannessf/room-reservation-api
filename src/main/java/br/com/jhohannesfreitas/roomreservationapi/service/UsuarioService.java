@@ -6,6 +6,8 @@ import br.com.jhohannesfreitas.roomreservationapi.dto.UsuarioResponse;
 import br.com.jhohannesfreitas.roomreservationapi.exception.RegraNegocioException;
 import br.com.jhohannesfreitas.roomreservationapi.mapper.UsuarioMapper;
 import br.com.jhohannesfreitas.roomreservationapi.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,11 @@ public class UsuarioService {
                 .map(UsuarioMapper::toResponse) // usuario -> UsuarioMapper.toResponse(usuario)
                 .toList();
 
+    }
+
+    public Page<UsuarioResponse> listarPorPaginacao(Pageable pageable) {
+        return usuarioRepository.findAll(pageable)
+                .map(UsuarioMapper::toResponse);
     }
 
     public UsuarioResponse listarPorId(Long id) {
@@ -103,4 +110,5 @@ public class UsuarioService {
                 .orElseThrow(() -> new RegraNegocioException("Usuário com id " + id + " não encontrado.",
                         HttpStatus.NOT_FOUND));
     }
+
 }
