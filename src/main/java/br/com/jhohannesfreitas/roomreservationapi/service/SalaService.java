@@ -7,6 +7,8 @@ import br.com.jhohannesfreitas.roomreservationapi.exception.RegraNegocioExceptio
 import br.com.jhohannesfreitas.roomreservationapi.mapper.SalaMapper;
 import br.com.jhohannesfreitas.roomreservationapi.repository.SalaRepository;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,12 +41,18 @@ public class SalaService {
 
     }
 
+    // Remover método lista sem paginação futuramente, feito apenas pra estudar
     public List<SalaResponse> listar() {
 
         // Busca a lista de Sala Entity, transformando em Resposta DTO e depois em uma lista
         return salaRepository.findAll().stream()
                 .map(SalaMapper::toResponse) // sala -> SalaMapper.toResponse(sala)
                 .toList();
+    }
+
+    public Page<SalaResponse> listarPorPaginacao(Pageable pageable) {
+        return salaRepository.findAll(pageable)
+                .map(SalaMapper::toResponse);
     }
 
     public SalaResponse listarPorId(Long id) {

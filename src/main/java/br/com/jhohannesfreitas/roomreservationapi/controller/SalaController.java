@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,6 +59,26 @@ public class SalaController {
     public ResponseEntity<List<SalaResponse>> listar() {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(salaService.listar());
+    }
+
+    @Operation(
+            summary = "Listar salas paginadas",
+            description = """
+                Retorna uma lista paginada de salas cadastradas.
+
+                É possível controlar a paginação utilizando os parâmetros:
+                - page: número da página (inicia em 0);
+                - size: quantidade de registros por página;
+                - sort: campo utilizado para ordenação, seguido da direção (asc ou desc).
+
+                Exemplo:
+                GET /api/v1/salas/paginado?page=0&size=10&sort=numero,desc
+                """
+    )
+    @GetMapping("/paginado")
+    public ResponseEntity<Page<SalaResponse>> listarPorPaginacao(Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(salaService.listarPorPaginacao(pageable));
     }
 
     @Operation(
