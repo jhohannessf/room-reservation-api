@@ -1,5 +1,6 @@
 package br.com.jhohannesfreitas.roomreservationapi.controller;
 
+import br.com.jhohannesfreitas.roomreservationapi.dto.ReservaResponse;
 import br.com.jhohannesfreitas.roomreservationapi.dto.UsuarioRequest;
 import br.com.jhohannesfreitas.roomreservationapi.dto.UsuarioResponse;
 import br.com.jhohannesfreitas.roomreservationapi.service.UsuarioService;
@@ -8,6 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -57,6 +60,26 @@ public class UsuarioController {
     public ResponseEntity<List<UsuarioResponse>> listar() {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(usuarioService.listar());
+    }
+
+    @Operation(
+            summary = "Listar usuários paginados",
+            description = """
+                Retorna uma lista paginada de usuários cadastradas.
+
+                É possível controlar a paginação utilizando os parâmetros:
+                - page: número da página (inicia em 0);
+                - size: quantidade de registros por página;
+                - sort: campo utilizado para ordenação, seguido da direção (asc ou desc).
+
+                Exemplo:
+                GET /api/v1/usuarios/paginado?page=0&size=10&sort=nome,desc
+                """
+    )
+    @GetMapping("/paginado")
+    public ResponseEntity<Page<UsuarioResponse>> listarPorPaginacao(Pageable pageable) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(usuarioService.listarPorPaginacao(pageable));
     }
 
     @Operation(
