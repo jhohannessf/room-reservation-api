@@ -1,0 +1,535 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Room Reservation API
+meta:
+  id: wrk_3d6f8529d0aa403584224609bba14915
+  created: 1784329707099
+  modified: 1784329707099
+  description: ""
+collection:
+  - url: http://localhost:8080/api/v1/reservas
+    name: Cadastrar
+    meta:
+      id: req_82120572f2dc4294ad04b8d572784e9c
+      created: 1784477594248
+      modified: 1784995098396
+      isPrivate: false
+      description: ""
+      sortKey: -1784333846476.25
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"usuarioId": "1",
+        	"salaId": "1",
+        	"data": "2026-07-25",
+        	"horaInicial": "17:00:00",
+        	"horaFinal": "18:00:00",
+        	"quantidadePessoas": "20"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/api/v1/reservas
+    name: Listar
+    meta:
+      id: req_a57b7fde2f0e492bba761b3bb6381443
+      created: 1784500375207
+      modified: 1784995012105
+      isPrivate: false
+      description: ""
+      sortKey: -1784332828102.25
+    method: GET
+    body:
+      mimeType: application/json
+      text: ""
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/api/v1/reservas/2
+    name: Listar Por ID
+    meta:
+      id: req_c705a9538e6f4f9fadf306cf65d5c720
+      created: 1784500400717
+      modified: 1784995001448
+      isPrivate: false
+      description: ""
+      sortKey: -1784332318915.25
+    method: GET
+    body:
+      mimeType: application/json
+      text: ""
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/api/v1/reservas/1
+    name: Atualizar
+    meta:
+      id: req_b2ae672537374c5d8b54b54ee2c82956
+      created: 1784504328950
+      modified: 1784504363705
+      isPrivate: false
+      description: ""
+      sortKey: -1784333337289.25
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"usuarioId": "1",
+        	"salaId": "2",
+        	"data": "2026-07-19",
+        	"horaInicial": "13:00:00",
+        	"horaFinal": "14:00:00",
+        	"quantidadePessoas": "20"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/api/v1/reservas/1
+    name: Deletar
+    meta:
+      id: req_d836c928d28b4d078311b8955752caa4
+      created: 1784504381541
+      modified: 1784504389720
+      isPrivate: false
+      description: ""
+      sortKey: -1784333082695.75
+    method: DELETE
+    body:
+      mimeType: application/json
+      text: ""
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/api/v1/reservas/paginado?page=0&size=10&sort=data,desc
+    name: Listar Por Paginação
+    meta:
+      id: req_4770ea8b15534f17ae17b788daf9cee3
+      created: 1784993961357
+      modified: 1784995150871
+      isPrivate: false
+      description: ""
+      sortKey: -1784332064321.75
+    method: GET
+    body:
+      mimeType: application/json
+      text: ""
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: http://localhost:8080/api/v1/reservas/sala/1?inicio=2026-07-01&fim=2026-07-31&page=0&size=10&sort=data,desc
+    name: Listar Por Sala e Intervalo
+    meta:
+      id: req_d60e19968ccb4f3dbaa585feaa65df86
+      created: 1784994065552
+      modified: 1785085968702
+      isPrivate: false
+      description: ""
+      sortKey: -1784331937025
+    method: GET
+    body:
+      mimeType: application/json
+      text: ""
+    headers:
+      - name: Content-Type
+        value: application/json
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - name: Usuario
+    meta:
+      id: fld_3c9c18282a1545479bcd576072629e1a
+      created: 1784329755282
+      modified: 1784329755282
+      sortKey: -1784329755282
+      description: ""
+    children:
+      - url: http://localhost:8080/api/v1/usuarios
+        name: Cadastrar
+        meta:
+          id: req_95b3694db15743f3a678c6f37ce37eae
+          created: 1784329762434
+          modified: 1784336559576
+          isPrivate: false
+          description: ""
+          sortKey: -1784329762434
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"nome": "Jhohanna Seabra",
+            	"email": "jhohanna.sf@gmail.com",
+            	"senha": "jhohanna@123"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/v1/usuarios
+        name: Listar
+        meta:
+          id: req_2ebd690b856647e9a9b6e27d3d094f27
+          created: 1784331062066
+          modified: 1784331069210
+          isPrivate: false
+          description: ""
+          sortKey: -1784069994676
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/v1/usuarios/3
+        name: Listar Por ID
+        meta:
+          id: req_553d07a0958d424cb7e35696ac9a9521
+          created: 1784331804666
+          modified: 1784344922493
+          isPrivate: false
+          description: ""
+          sortKey: -1783940110797
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/v1/usuarios/1
+        name: Atualizar
+        meta:
+          id: req_88c2515f531049b3b12e66f9d5c3d569
+          created: 1784336501790
+          modified: 1784344901721
+          isPrivate: false
+          description: ""
+          sortKey: -1784199878555
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"nome": "Jhohannes Seabra",
+            	"email": "jhohannes.sf@gmail.com",
+            	"senha": "jhou@123"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/v1/usuarios/2
+        name: Deletar Por ID
+        meta:
+          id: req_f669078690b246aaa8f57d6d37907d5e
+          created: 1784344638097
+          modified: 1784344649324
+          isPrivate: false
+          description: ""
+          sortKey: -1783875168857.5
+        method: DELETE
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/v1/usuarios/paginado?page=0&size=10&sort=nome,desc
+        name: Listar Por Paginação
+        meta:
+          id: req_294ba0f9e3ba480993ddd4dfad4fa454
+          created: 1785110843030
+          modified: 1785110873967
+          isPrivate: false
+          description: ""
+          sortKey: -1783907639827.25
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Sala
+    meta:
+      id: fld_d8807858edc04e10801d13deff273421
+      created: 1784346120059
+      modified: 1784346120059
+      sortKey: -1784346120059
+      description: ""
+    children:
+      - url: http://localhost:8080/api/v1/salas
+        name: Cadastrar
+        meta:
+          id: req_831c95cc9ed8473b997300b0dd3e32f6
+          created: 1784346134817
+          modified: 1784404224032
+          isPrivate: false
+          description: ""
+          sortKey: -1784346140788
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"numero": "3",
+            	"capacidade": "20"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/v1/salas
+        name: Listar
+        meta:
+          id: req_370eef3857e44a66b4c9dd1903d949d0
+          created: 1784401334625
+          modified: 1784401342272
+          isPrivate: false
+          description: ""
+          sortKey: -1784337951611
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/v1/salas/2
+        name: Listar Por ID
+        meta:
+          id: req_ac5b7bdffa304a649723d9bfd2f5ed88
+          created: 1784401858446
+          modified: 1784699106198
+          isPrivate: false
+          description: ""
+          sortKey: -1784333857022.5
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/v1/salas/3
+        name: Atualizar
+        meta:
+          id: req_9e2c54a0cfc24318b82340fe1462b8f3
+          created: 1784404174458
+          modified: 1784404802772
+          isPrivate: false
+          description: ""
+          sortKey: -1784342046199.5
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"numero": "3",
+            	"capacidade": "40"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/v1/salas/3
+        name: Deletar
+        meta:
+          id: req_56fe5ed5649b426bb8b1df0dc746d798
+          created: 1784405043634
+          modified: 1784405060066
+          isPrivate: false
+          description: ""
+          sortKey: -1784331809728.25
+        method: DELETE
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: http://localhost:8080/api/v1/salas/paginado?page=0&size=10&sort=numero,desc
+        name: Listar Por Paginação
+        meta:
+          id: req_0739086aa13943b29178f752d4a3efd2
+          created: 1785164422972
+          modified: 1785166210332
+          isPrivate: false
+          description: ""
+          sortKey: -1784335904316.75
+        method: GET
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - name: Reserva
+    meta:
+      id: fld_608c894ca0ad4ac49868b26ac8da257c
+      created: 1784477525472
+      modified: 1784477581845
+      sortKey: -1784337937670.5
+      description: ""
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_7921979abd393de64c52ef398d845f310735c38a
+    created: 1784329707101
+    modified: 1784329707101
+environments:
+  name: Base Environment
+  meta:
+    id: env_7921979abd393de64c52ef398d845f310735c38a
+    created: 1784329707100
+    modified: 1784329707100
+    isPrivate: false
