@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -155,6 +156,105 @@ class SalaServiceTest {
 
         // Verifica se o método retornou uma lista vazia.
         Assertions.assertTrue(salaResponseList.isEmpty());
+    }
+
+    @Test
+    void deveriaPaginarSalasQuandoTiverCadastradas() {
+        // ARRANGE
+
+        // Criação da sala
+        Sala sala = criarSala();
+
+        Sala sala2 = new Sala (
+                2,
+                30
+        );
+        ReflectionTestUtils.setField(sala2, "id", 2L);
+
+        // Paginação
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("numero").ascending());
+        Page<Sala> page = new PageImpl<>(List.of(sala, sala2), pageable, 2);
+
+        given(salaRepository.findAll(pageable)).willReturn(page);
+
+        // ACT
+        Page<SalaResponse> salaResponse = salaService.listarPorPaginacao(pageable);
+        SalaResponse primeiraSalaResponse = salaResponse.getContent().getFirst();
+        SalaResponse segundaSalaResponse = salaResponse.getContent().get(1);
+
+
+        // ASSERT
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o 'findAll()' aconteceu.
+        then(salaRepository).should().findAll(pageable);
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
+
+
+        Assertions.assertAll(
+                // Informações da paginação
+                () -> Assertions.assertEquals(2, salaResponse.getNumberOfElements()), // verificar a quantidade de elementos na página atual
+                () -> Assertions.assertEquals(2, salaResponse.getTotalElements()), // verificar a quantidade total de registros
+                () -> Assertions.assertEquals(1, salaResponse.getTotalPages()), // verificar a quantidade total de páginas
+                () -> Assertions.assertEquals(0, salaResponse.getNumber()), // verificar o número da página atual
+                () -> Assertions.assertEquals(10, salaResponse.getSize()), // verificar o tamanho da página
+                () -> Assertions.assertEquals(2, salaResponse.getContent().size()), // Verificar a quantidade de elementos retornados
+                () -> Assertions.assertEquals(pageable.getSort(), salaResponse.getSort()), // verificar a ordenação
+                () -> Assertions.assertTrue(salaResponse.isFirst()), // verifica se a página retornada é a primeira
+                () -> Assertions.assertTrue(salaResponse.isLast()), // verifica se a página retornada é a última
+
+                () -> Assertions.assertEquals(sala.getId(), primeiraSalaResponse.id()),
+                () -> Assertions.assertEquals(sala.getNumero(), primeiraSalaResponse.numero()),
+                () -> Assertions.assertEquals(sala.getCapacidade(), primeiraSalaResponse.capacidade()),
+                () -> Assertions.assertEquals(sala.getStatus(), primeiraSalaResponse.status()),
+
+                () -> Assertions.assertEquals(sala2.getId(), segundaSalaResponse.id()),
+                () -> Assertions.assertEquals(sala2.getNumero(), segundaSalaResponse.numero()),
+                () -> Assertions.assertEquals(sala2.getCapacidade(), segundaSalaResponse.capacidade()),
+                () -> Assertions.assertEquals(sala2.getStatus(), segundaSalaResponse.status())
+
+        );
+    }
+
+    @Test
+    void deveriaRetornarPaginaVaziaQuandoNaoExistiremSalasCadastradas() {
+        // ARRANGE
+
+        // Paginação
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("numero").ascending());
+        Page<Sala> page = Page.empty(pageable); // a página vazia mantém as mesmas informações de paginação (tamanho da página e ordenação) do Pageable
+
+        given(salaRepository.findAll(pageable)).willReturn(page);
+
+        // ACT
+        Page<SalaResponse> salaResponse = salaService.listarPorPaginacao(pageable);
+
+        // ASSERT
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o 'findAll()' aconteceu.
+        then(salaRepository).should().findAll(pageable);
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
+
+
+        Assertions.assertAll(
+                // Informações da paginação
+                () -> Assertions.assertTrue(salaResponse.isEmpty()), // verifica se é verdade que salaResponse é vazio
+                () -> Assertions.assertEquals(0, salaResponse.getNumberOfElements()), // verificar a quantidade de elementos na página atual
+                () -> Assertions.assertEquals(0, salaResponse.getTotalElements()), // verificar a quantidade total de registros
+                () -> Assertions.assertEquals(0, salaResponse.getTotalPages()), // verificar a quantidade total de páginas
+                () -> Assertions.assertEquals(0, salaResponse.getNumber()), // verificar o número da página atual
+                () -> Assertions.assertEquals(10, salaResponse.getSize()), // verificar o tamanho da página
+                () -> Assertions.assertEquals(pageable.getSort(), salaResponse.getSort()), // verificar a ordenação
+
+                () -> Assertions.assertTrue(salaResponse.isFirst()), // verifica se a página retornada é a primeira
+                () -> Assertions.assertTrue(salaResponse.isLast()) // verifica se a página retornada é a última
+
+        );
     }
 
     @Test
