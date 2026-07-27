@@ -1,6 +1,7 @@
 package br.com.jhohannesfreitas.roomreservationapi.service;
 
 import br.com.jhohannesfreitas.roomreservationapi.domain.entity.Usuario;
+import br.com.jhohannesfreitas.roomreservationapi.dto.ReservaResponse;
 import br.com.jhohannesfreitas.roomreservationapi.dto.UsuarioRequest;
 import br.com.jhohannesfreitas.roomreservationapi.dto.UsuarioResponse;
 import br.com.jhohannesfreitas.roomreservationapi.exception.RegraNegocioException;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -169,6 +171,107 @@ class UsuarioServiceTest {
 
         // "Verifique se o método retornou uma lista vazia"
         Assertions.assertTrue(listResponse.isEmpty()); // Verifica se é verdade que a lista deve estar vazia
+    }
+
+    @Test
+    void deveriaListarUsuariosCadastradosPaginados() {
+        // ARRANGE
+        Usuario usuario = criarUsuario();
+
+        Usuario usuario2 = new Usuario(
+                "Usuario teste 2",
+                "teste2@gmail.com",
+                "teste@123"
+        );
+        ReflectionTestUtils.setField(usuario2, "id", 2L);
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("nome").ascending());
+        Page<Usuario> page = new PageImpl<>(List.of(usuario, usuario2), pageable, 2);
+
+        given(usuarioRepository.findAll(pageable)).willReturn(page);
+
+        // ACT
+        Page<UsuarioResponse> usuarioResponse = usuarioService.listarPorPaginacao(pageable);
+        UsuarioResponse primeiroUsuarioResponse = usuarioResponse.getContent().getFirst();
+        UsuarioResponse segundoUsuarioResponse = usuarioResponse.getContent().get(1);
+
+        // ASSERT
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o 'findAll()' aconteceu 1x para o objeto Usuario.
+        then(usuarioRepository).should().findAll(pageable);
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
+
+        // "Verifique se o nome que eu esperava é igual ao nome que o método retornou."
+        // assertEquals(valorEsperado, valorObtido);
+
+        Assertions.assertAll(
+
+                // Informações da paginação
+                () -> Assertions.assertEquals(2, usuarioResponse.getNumberOfElements()), // verificar a quantidade de elementos na página atual
+                () -> Assertions.assertEquals(2, usuarioResponse.getTotalElements()), // verificar a quantidade total de registros
+                () -> Assertions.assertEquals(1, usuarioResponse.getTotalPages()), // verificar a quantidade total de páginas
+                () -> Assertions.assertEquals(0, usuarioResponse.getNumber()), // verificar o número da página atual
+                () -> Assertions.assertEquals(10, usuarioResponse.getSize()), // verificar o tamanho da página
+                () -> Assertions.assertEquals(2, usuarioResponse.getContent().size()), // Verificar a quantidade de elementos retornados
+                () -> Assertions.assertEquals(pageable.getSort(), usuarioResponse.getSort()), // verificar a ordenação
+
+                () -> Assertions.assertTrue(usuarioResponse.isFirst()), // Verifica se é verdade que a página retornada é a primeira
+                () -> Assertions.assertTrue(usuarioResponse.isLast()),  // Verifica se é verdade que a página retornada é a última
+
+                () -> Assertions.assertEquals(usuario.getId(), primeiroUsuarioResponse.id()),
+                () -> Assertions.assertEquals(usuario.getNome(), primeiroUsuarioResponse.nome()),
+                () -> Assertions.assertEquals(usuario.getEmail(), primeiroUsuarioResponse.email()),
+
+                () -> Assertions.assertEquals(usuario2.getId(), segundoUsuarioResponse.id()),
+                () -> Assertions.assertEquals(usuario2.getNome(), segundoUsuarioResponse.nome()),
+                () -> Assertions.assertEquals(usuario2.getEmail(), segundoUsuarioResponse.email())
+        );
+
+    }
+
+    @Test
+    void deveriaRetorarPaginaVaziaQuandoNaoExistiremUsuariosCadastrados() {
+        // ARRANGE
+
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("nome").ascending());
+        Page<Usuario> page = Page.empty(pageable);
+
+        given(usuarioRepository.findAll(pageable)).willReturn(page);
+
+        // ACT
+        Page<UsuarioResponse> usuarioResponse = usuarioService.listarPorPaginacao(pageable);
+
+        // ASSERT
+
+        // 1. Verificação de comportamento (Behavior Verification): Você verifica que determinadas chamadas aconteceram.
+
+        // Então Repository, você DEVERIA verificar que o 'findAll()' aconteceu 1x para o objeto Usuario.
+        then(usuarioRepository).should().findAll(pageable);
+
+        // 2. Verificação de estado (State Verification): Você verifica o resultado obtido.
+
+        // assertEquals(valorEsperado, valorObtido);
+
+        Assertions.assertAll(
+
+                // Informações da paginação
+                () -> Assertions.assertTrue(usuarioResponse.isEmpty()),
+                () -> Assertions.assertEquals(0, usuarioResponse.getNumberOfElements()), // verificar a quantidade de elementos na página atual
+                () -> Assertions.assertEquals(0, usuarioResponse.getTotalElements()), // verificar a quantidade total de registros
+                () -> Assertions.assertEquals(0, usuarioResponse.getTotalPages()), // verificar a quantidade total de páginas
+                () -> Assertions.assertEquals(0, usuarioResponse.getNumber()), // verificar o número da página atual
+                () -> Assertions.assertEquals(10, usuarioResponse.getSize()), // verificar o tamanho da página
+                () -> Assertions.assertEquals(pageable.getSort(), usuarioResponse.getSort()), // verificar a ordenação
+
+                () -> Assertions.assertTrue(usuarioResponse.isFirst()), // Verifica se é verdade que a página retornada é a primeira
+                () -> Assertions.assertTrue(usuarioResponse.isLast())  // Verifica se é verdade que a página retornada é a última
+
+        );
+
     }
 
     @Test
